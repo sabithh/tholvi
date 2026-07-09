@@ -20,7 +20,7 @@ export type FeedPost = {
   i_bookmarked: boolean;
 };
 
-export function AuthorBlock({ post, size = "sm" }: { post: FeedPost; size?: "sm" | "md" }) {
+export function AuthorBlock({ post, size = "sm", link = true }: { post: FeedPost; size?: "sm" | "md"; link?: boolean }) {
   if (post.is_anonymous || !post.author) {
     return (
       <div className="flex items-center gap-2">
@@ -30,8 +30,8 @@ export function AuthorBlock({ post, size = "sm" }: { post: FeedPost; size?: "sm"
       </div>
     );
   }
-  return (
-    <Link to="/u/$username" params={{ username: post.author.username }} className="flex items-center gap-2 hover:opacity-80 min-w-0">
+  const content = (
+    <>
       <div className={`${size === "md" ? "h-10 w-10" : "h-8 w-8"} shrink-0 rounded-full bg-white/10 overflow-hidden grid place-items-center`}>
         {post.author.avatar_url ? (
           <img src={post.author.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -43,6 +43,16 @@ export function AuthorBlock({ post, size = "sm" }: { post: FeedPost; size?: "sm"
         <div className="text-sm text-white truncate">{post.author.display_name}</div>
         <div className="text-xs text-white/50 truncate">@{post.author.username}</div>
       </div>
+    </>
+  );
+
+  if (!link) {
+    return <div className="flex items-center gap-2 min-w-0">{content}</div>;
+  }
+
+  return (
+    <Link to="/u/$username" params={{ username: post.author.username }} className="flex items-center gap-2 hover:opacity-80 min-w-0">
+      {content}
     </Link>
   );
 }
@@ -95,7 +105,7 @@ export function PostCard({ post, userId }: { post: FeedPost; userId: string | nu
       {/* top hairline highlight */}
       <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
       <div className="flex items-center justify-between gap-3 mb-3 min-w-0">
-        <div className="min-w-0 flex-1"><AuthorBlock post={post} /></div>
+        <div className="min-w-0 flex-1"><AuthorBlock post={post} link={false} /></div>
         <div className={`shrink-0 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] uppercase tracking-[0.14em] text-white/85 border border-white/10 bg-gradient-to-br ${meta.tint} shadow-[0_4px_20px_-8px_rgba(168,85,247,0.5)]`}>
           <meta.icon className="h-3.5 w-3.5" />
           <span>{meta.label}</span>

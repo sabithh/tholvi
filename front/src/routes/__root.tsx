@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import tholviLogo from "@/assets/tholvi-logo.png";
+import tholviLogoTransparent from "@/assets/tholvi-logo-transparent.png";
 
 function NotFoundComponent() {
   return (
@@ -94,8 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", type: "image/png", href: tholviLogo },
-      { rel: "apple-touch-icon", href: tholviLogo },
+      { rel: "icon", type: "image/png", href: tholviLogoTransparent },
+      { rel: "apple-touch-icon", href: tholviLogoTransparent },
       {
         rel: "preconnect",
         href: "https://fonts.googleapis.com",
@@ -112,6 +112,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap",
       },
     ],
   }),

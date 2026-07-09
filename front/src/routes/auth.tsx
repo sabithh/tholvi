@@ -24,7 +24,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) router.navigate({ to: "/feed", replace: true });
+      if (data.user) router.navigate({ to: "/", replace: true });
     });
   }, [router]);
 
@@ -44,7 +44,7 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Welcome back");
       }
-      router.navigate({ to: "/feed", replace: true });
+      router.navigate({ to: "/", replace: true });
     } catch (err: any) {
       toast.error(err.message ?? "Authentication failed");
     } finally {
@@ -56,7 +56,7 @@ function AuthPage() {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (r.error) { toast.error("Google sign-in failed"); return; }
     if (r.redirected) return;
-    router.navigate({ to: "/feed", replace: true });
+    router.navigate({ to: "/", replace: true });
   }
 
   return (

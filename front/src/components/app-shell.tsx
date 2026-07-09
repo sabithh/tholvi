@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import tholviLogo from "@/assets/tholvi-logo.png";
+import tholviLogo from "@/assets/tholvi-logo-transparent.png";
 
 function NavItem({
   to, params, icon: Icon, label, badge, active,
@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const nav = [
     { to: "/", icon: Home, label: "Home", authRequired: false },
-    { to: "/search", icon: Search, label: "Search", authRequired: true },
+    { to: "/search", icon: Search, label: "Search", authRequired: false },
     { to: "/notifications", icon: Bell, label: "Notifications", badge: notifCount, authRequired: true },
     { to: "/messages", icon: MessageCircle, label: "Messages", badge: msgCount, authRequired: true },
     { to: "/bookmarks", icon: Bookmark, label: "Bookmarks", authRequired: true },
@@ -77,16 +77,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex">
       {/* Sidebar - desktop */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 w-72 z-30 p-4">
+      <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 z-30 p-4">
         <div className="glass rounded-3xl flex flex-col w-full p-4">
-          <Link to="/" className="flex items-center gap-3 px-3 py-3 mb-2">
-            <div className="h-11 w-11 rounded-full bg-white grid place-items-center overflow-hidden glow-violet shrink-0">
-              <img src={tholviLogo} alt="THOLVI" className="h-full w-full object-cover" />
-            </div>
-            <div className="min-w-0">
-              <div className="font-display text-[1.35rem] text-white leading-none">THOLVI</div>
-              <div className="text-[10px] text-white/50 uppercase tracking-[0.2em] mt-1">Share your fails · Inspire others</div>
-            </div>
+          {/* Logo */}
+          <Link to="/" className="flex items-center justify-center px-3 py-3 mb-2">
+            <img
+              src={tholviLogo}
+              alt="THOLVI — Share your fails. Inspire others."
+              className="w-full h-auto shrink-0 object-contain invert drop-shadow-[0_0_25px_rgba(168,85,247,0.45)]"
+            />
           </Link>
 
           <nav className="flex flex-col gap-1 mt-2">
@@ -112,7 +111,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <Link
             to="/new"
-            className="mt-4 flex items-center justify-center gap-2 rounded-2xl gradient-violet text-white font-semibold py-3 glow-violet hover:brightness-110 transition"
+            className="mt-4 flex items-center justify-center gap-2 rounded-2xl gradient-violet text-white font-semibold py-3 glow-violet hover:brightness-110 transition text-sm"
           >
             <PenSquare className="h-4 w-4" /> Share a failure
           </Link>
@@ -120,7 +119,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="mt-auto pt-4 border-t border-white/10">
             {profile ? (
               <div className="flex items-center gap-3 px-2">
-                <div className="h-9 w-9 rounded-full bg-white/10 grid place-items-center overflow-hidden">
+                <div className="h-9 w-9 rounded-full bg-white/10 grid place-items-center overflow-hidden shrink-0">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
                   ) : (
@@ -131,7 +130,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <div className="text-sm text-white truncate">{profile.display_name}</div>
                   <div className="text-xs text-white/50 truncate">@{profile.username}</div>
                 </div>
-                <button onClick={handleSignOut} aria-label="Sign out" className="text-white/50 hover:text-white">
+                <button onClick={handleSignOut} aria-label="Sign out" className="text-white/50 hover:text-white shrink-0">
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>
@@ -140,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to="/auth"
                 className="flex items-center justify-center gap-2 rounded-2xl bg-white/5 border border-white/10 text-white text-sm font-medium py-2.5 hover:bg-white/10 transition"
               >
-                Sign in / Create account
+                Sign in / Join
               </Link>
             )}
           </div>
@@ -148,18 +147,18 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 md:ml-72 min-h-screen pb-24 md:pb-8">
+      <main className="flex-1 md:ml-64 min-h-screen pb-24 md:pb-8">
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-6">{children}</div>
       </main>
 
       {/* Bottom nav - mobile */}
       <nav className="md:hidden fixed bottom-3 left-3 right-3 z-30 glass rounded-2xl px-2 py-2 flex justify-around">
         {[
-          { to: "/", icon: Home, label: "Home", authRequired: false },
-          { to: "/search", icon: Search, label: "Search", authRequired: true },
-          { to: "/new", icon: PenSquare, label: "Post", authRequired: false },
-          { to: "/notifications", icon: Bell, label: "Alerts", badge: notifCount, authRequired: true },
-          { to: "/messages", icon: MessageCircle, label: "DMs", badge: msgCount, authRequired: true },
+          { to: "/", icon: Home, label: "Home" },
+          { to: "/search", icon: Search, label: "Search" },
+          { to: "/new", icon: PenSquare, label: "Post" },
+          { to: "/notifications", icon: Bell, label: "Alerts", badge: notifCount },
+          { to: "/messages", icon: MessageCircle, label: "DMs", badge: msgCount },
         ].map((n) => {
           const active = path === n.to;
           return (
