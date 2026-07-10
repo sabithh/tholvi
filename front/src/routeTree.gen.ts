@@ -9,23 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as NewRouteImport } from './routes/new'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as PostIdRouteImport } from './routes/post.$id'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedNewRouteImport } from './routes/_authenticated/new'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedBookmarksRouteImport } from './routes/_authenticated/bookmarks'
 import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
 
-const NewRoute = NewRouteImport.update({
-  id: '/new',
-  path: '/new',
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -57,17 +57,17 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedNewRoute = AuthenticatedNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -92,12 +92,12 @@ const AuthenticatedMessagesIdRoute = AuthenticatedMessagesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/new': typeof NewRoute
+  '/search': typeof SearchRoute
   '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/feed': typeof AuthenticatedFeedRoute
   '/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/new': typeof AuthenticatedNewRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
-  '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/post/$id': typeof PostIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -106,12 +106,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/new': typeof NewRoute
+  '/search': typeof SearchRoute
   '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/feed': typeof AuthenticatedFeedRoute
   '/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/new': typeof AuthenticatedNewRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
-  '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/post/$id': typeof PostIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -122,12 +122,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/new': typeof NewRoute
+  '/search': typeof SearchRoute
   '/_authenticated/bookmarks': typeof AuthenticatedBookmarksRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
+  '/_authenticated/new': typeof AuthenticatedNewRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
-  '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/post/$id': typeof PostIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -138,12 +138,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/new'
+    | '/search'
     | '/bookmarks'
     | '/feed'
     | '/messages'
+    | '/new'
     | '/notifications'
-    | '/search'
     | '/settings'
     | '/post/$id'
     | '/u/$username'
@@ -152,12 +152,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/new'
+    | '/search'
     | '/bookmarks'
     | '/feed'
     | '/messages'
+    | '/new'
     | '/notifications'
-    | '/search'
     | '/settings'
     | '/post/$id'
     | '/u/$username'
@@ -167,12 +167,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/new'
+    | '/search'
     | '/_authenticated/bookmarks'
     | '/_authenticated/feed'
     | '/_authenticated/messages'
+    | '/_authenticated/new'
     | '/_authenticated/notifications'
-    | '/_authenticated/search'
     | '/_authenticated/settings'
     | '/post/$id'
     | '/u/$username'
@@ -183,18 +183,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  NewRoute: typeof NewRoute
+  SearchRoute: typeof SearchRoute
   PostIdRoute: typeof PostIdRoute
   UUsernameRoute: typeof UUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/new': {
-      id: '/new'
-      path: '/new'
-      fullPath: '/new'
-      preLoaderRoute: typeof NewRouteImport
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -239,18 +239,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/search': {
-      id: '/_authenticated/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof AuthenticatedSearchRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/notifications': {
       id: '/_authenticated/notifications'
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/new': {
+      id: '/_authenticated/new'
+      path: '/new'
+      fullPath: '/new'
+      preLoaderRoute: typeof AuthenticatedNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/messages': {
@@ -301,8 +301,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBookmarksRoute: typeof AuthenticatedBookmarksRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
+  AuthenticatedNewRoute: typeof AuthenticatedNewRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
-  AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
 }
 
@@ -310,8 +310,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBookmarksRoute: AuthenticatedBookmarksRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
+  AuthenticatedNewRoute: AuthenticatedNewRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
-  AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
 }
 
@@ -322,7 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  NewRoute: NewRoute,
+  SearchRoute: SearchRoute,
   PostIdRoute: PostIdRoute,
   UUsernameRoute: UUsernameRoute,
 }
