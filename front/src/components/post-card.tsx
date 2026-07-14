@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bookmark, MessageCircle, Sparkles } from "lucide-react";
+import { Bookmark, MessageCircle, Share2, Sparkles } from "lucide-react";
 import { categoryMeta, timeAgo } from "@/lib/categories";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -96,6 +96,17 @@ export function PostCard({ post, userId }: { post: FeedPost; userId: string | nu
     }
   }
 
+  async function share(e: React.MouseEvent) {
+    e.preventDefault();
+    const url = `${window.location.origin}/post/${post.id}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: post.title, url }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied!");
+    }
+  }
+
   return (
     <Link
       to="/post/$id"
@@ -126,6 +137,9 @@ export function PostCard({ post, userId }: { post: FeedPost; userId: string | nu
           <MessageCircle className="h-4 w-4" />
           <span>{post.comment_count}</span>
         </span>
+        <button onClick={share} className="hover:text-violet-300 transition" title="Share">
+          <Share2 className="h-4 w-4" />
+        </button>
         <button onClick={toggleBookmark} className={`ml-auto hover:text-violet-300 transition ${bookmarked ? "text-violet-300" : ""}`}>
           <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
         </button>

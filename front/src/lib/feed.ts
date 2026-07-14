@@ -1,14 +1,28 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { FeedPost } from "@/components/post-card";
 
-type Filter = { category?: string | null; authorId?: string; followingOf?: string; bookmarkedBy?: string; search?: string };
+const PAGE_SIZE = 20;
+
+type Filter = {
+  category?: string | null;
+  authorId?: string;
+  followingOf?: string;
+  bookmarkedBy?: string;
+  search?: string;
+  /** cursor: ISO timestamp — fetch posts older than this date */
+  cursor?: string;
+};
+
+export { PAGE_SIZE };
 
 export async function fetchFeed(filter: Filter, userId: string | null): Promise<FeedPost[]> {
   let q = supabase.from("posts").select("id,title,body,category,is_anonymous,created_at,author_id");
   if (filter.category) q = q.eq("category", filter.category as any);
   if (filter.authorId) q = q.eq("author_id", filter.authorId);
-  if (filter.search) q = q.or(`title.ilike.%${filter.search}%,body.ilike.%${filter.search}%`);
-  q = q.order("created_at", { ascending: false }).limit(50);
+  if (filter.search) q = q.or(`title.ilike.%${filter.search}%,body.ilike.%${filter.search}%,lessons_learned.ilike.%${filter.search}%`);
+  // Cursor-based pagination — get posts older than cursor
+  if (filter.cursor) q = q.lt("created_at", filter.cursor);
+  q = q.order("created_at", { ascending: false }).limit(PAGE_SIZE);
 
   if (filter.followingOf) {
     const { data: fol } = await supabase.from("follows").select("following_id").eq("follower_id", filter.followingOf);

@@ -17,11 +17,12 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -58,6 +59,22 @@ function AuthPage() {
     }
   }
 
+  async function onForgot(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setResetSent(true);
+    } catch (err: any) {
+      toast.error(err.message ?? "Failed to send reset email");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function onGoogle() {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (r.error) { toast.error("Google sign-in failed"); return; }
@@ -86,43 +103,90 @@ function AuthPage() {
           <p className="text-sm text-white/60 mt-1">Where founders share what didn't work.</p>
         </div>
 
-        <div className="flex gap-1 p-1 rounded-2xl bg-white/5 border border-white/10 mb-5">
-          {(["signin","signup"] as const).map((m) => (
-            <button key={m} onClick={() => setMode(m)}
-              className={`flex-1 py-2 rounded-xl text-sm font-medium transition ${
-                mode === m ? "bg-white/10 text-white" : "text-white/55 hover:text-white"
-              }`}>
-              {m === "signin" ? "Sign in" : "Create account"}
+        {/* Tab switcher — only show for signin/signup */}
+        {mode !== "forgot" && (
+          <div className="flex gap-1 p-1 rounded-2xl bg-white/5 border border-white/10 mb-5">
+            {(["signin", "signup"] as const).map((m) => (
+              <button key={m} onClick={() => setMode(m)}
+                className={`flex-1 py-2 rounded-xl text-sm font-medium transition ${
+                  mode === m ? "bg-white/10 text-white" : "text-white/55 hover:text-white"
+                }`}>
+                {m === "signin" ? "Sign in" : "Create account"}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {mode === "forgot" ? (
+          /* ── Forgot Password ── */
+          <div>
+            <button onClick={() => { setMode("signin"); setResetSent(false); }}
+              className="flex items-center gap-1.5 text-sm text-white/50 hover:text-white transition mb-5">
+              <ArrowLeft className="h-4 w-4" /> Back to sign in
             </button>
-          ))}
-        </div>
+            <h2 className="text-lg font-semibold text-white mb-1">Reset your password</h2>
+            <p className="text-sm text-white/55 mb-5">We'll email you a link to set a new password.</p>
+            {resetSent ? (
+              <div className="glass rounded-2xl p-5 text-center space-y-2">
+                <div className="text-2xl">📬</div>
+                <p className="text-sm text-white/80">Check your inbox!</p>
+                <p className="text-xs text-white/50">A reset link was sent to <span className="text-white">{email}</span></p>
+                <button onClick={() => { setMode("signin"); setResetSent(false); }}
+                  className="mt-2 text-xs text-violet-400 hover:text-violet-300">Back to sign in</button>
+              </div>
+            ) : (
+              <form onSubmit={onForgot} className="space-y-3">
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-violet-400/50" />
+                <button type="submit" disabled={loading}
+                  className="w-full gradient-violet text-white font-semibold py-3 rounded-2xl glow-violet hover:brightness-110 disabled:opacity-50 transition">
+                  {loading ? "Sending…" : "Send reset link"}
+                </button>
+              </form>
+            )}
+          </div>
+        ) : (
+          /* ── Sign in / Sign up ── */
+          <></>
+        )}
 
-        <button onClick={onGoogle}
-          className="w-full glass rounded-2xl py-3 text-sm font-medium text-white hover:bg-white/10 transition flex items-center justify-center gap-2 mb-4">
-          <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.9 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.8-3.1-11.3-7.6l-6.6 5.1C9.6 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.7 2-2 3.8-3.7 5.2l6.2 5.2C39.9 35.6 44 30.3 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
-          Continue with Google
-        </button>
+        {mode !== "forgot" && (
+          <>
+            <button onClick={onGoogle}
+              className="w-full glass rounded-2xl py-3 text-sm font-medium text-white hover:bg-white/10 transition flex items-center justify-center gap-2 mb-4">
+              <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.9 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.8-3.1-11.3-7.6l-6.6 5.1C9.6 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.7 2-2 3.8-3.7 5.2l6.2 5.2C39.9 35.6 44 30.3 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+              Continue with Google
+            </button>
 
-        <div className="flex items-center gap-3 my-4">
-          <div className="h-px flex-1 bg-white/10" />
-          <span className="text-[10px] uppercase tracking-widest text-white/40">or with email</span>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+            <div className="flex items-center gap-3 my-4">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-[10px] uppercase tracking-widest text-white/40">or with email</span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
 
-        <form onSubmit={onSubmit} className="space-y-3">
-          {mode === "signup" && (
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name"
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-violet-400/50" />
-          )}
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-violet-400/50" />
-          <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password (min 6 chars)"
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-violet-400/50" />
-          <button type="submit" disabled={loading}
-            className="w-full gradient-violet text-white font-semibold py-3 rounded-2xl glow-violet hover:brightness-110 disabled:opacity-50 transition">
-            {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
-          </button>
-        </form>
+            <form onSubmit={onSubmit} className="space-y-3">
+              {mode === "signup" && (
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-violet-400/50" />
+              )}
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-violet-400/50" />
+              <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password (min 6 chars)"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-violet-400/50" />
+              <button type="submit" disabled={loading}
+                className="w-full gradient-violet text-white font-semibold py-3 rounded-2xl glow-violet hover:brightness-110 disabled:opacity-50 transition">
+                {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+              </button>
+              {mode === "signin" && (
+                <button type="button" onClick={() => setMode("forgot")}
+                  className="w-full text-center text-xs text-white/45 hover:text-white/70 transition pt-1">
+                  Forgot your password?
+                </button>
+              )}
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

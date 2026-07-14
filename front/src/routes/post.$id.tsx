@@ -1,9 +1,9 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Bookmark, MessageCircle, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, Bookmark, Edit2, MessageCircle, Send, Sparkles, Trash2, X, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { categoryMeta, timeAgo } from "@/lib/categories";
+import { categoryMeta, timeAgo, CATEGORIES, type Category } from "@/lib/categories";
 import { AppShell } from "@/components/app-shell";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/post/$id")({
 function PostPage() {
   const { id } = Route.useParams();
   const { user } = useCurrentUser();
+  const router = useRouter();
   const [post, setPost] = useState<any>(undefined);
   const [author, setAuthor] = useState<any>(null);
   const [glows, setGlows] = useState(0);
@@ -27,11 +28,27 @@ function PostPage() {
   const [draft, setDraft] = useState("");
   const [anon, setAnon] = useState(false);
 
+  // Edit state
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editBody, setEditBody] = useState("");
+  const [editLessons, setEditLessons] = useState("");
+  const [editCategory, setEditCategory] = useState<Category>("general");
+  const [saving, setSaving] = useState(false);
+
+  // Delete state
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     (async () => {
       const { data: p } = await supabase.from("posts").select("*").eq("id", id).maybeSingle();
       if (!p) { setPost(null); return; }
       setPost(p);
+      setEditTitle(p.title);
+      setEditBody(p.body);
+      setEditLessons(p.lessons_learned ?? "");
+      setEditCategory(p.category);
       if (!p.is_anonymous) {
         const { data: a } = await supabase.from("profiles").select("id,username,display_name,avatar_url").eq("id", p.author_id).maybeSingle();
         setAuthor(a);
@@ -78,10 +95,36 @@ function PostPage() {
     if (error) toast.error(error.message); else await loadComments();
   }
 
+  async function saveEdit() {
+    if (!editTitle.trim() || !editBody.trim()) { toast.error("Title and story are required"); return; }
+    setSaving(true);
+    const { error } = await supabase.from("posts").update({
+      title: editTitle.trim(),
+      body: editBody.trim(),
+      lessons_learned: editLessons.trim() || null,
+      category: editCategory,
+    }).eq("id", id);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    setPost((p: any) => ({ ...p, title: editTitle.trim(), body: editBody.trim(), lessons_learned: editLessons.trim() || null, category: editCategory }));
+    setEditing(false);
+    toast.success("Story updated");
+  }
+
+  async function deletePost() {
+    setDeleting(true);
+    const { error } = await supabase.from("posts").delete().eq("id", id);
+    setDeleting(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Story deleted");
+    router.navigate({ to: "/", replace: true });
+  }
+
   if (post === undefined) return <AppShell><div className="py-20 text-center text-white/60">Loading…</div></AppShell>;
   if (post === null) return <AppShell><div className="py-20 text-center text-white/60">Story not found.</div></AppShell>;
 
-  const meta = categoryMeta(post.category);
+  const meta = categoryMeta(editing ? editCategory : post.category);
+  const isAuthor = user?.id === post.author_id;
 
   return (
     <AppShell>
@@ -107,19 +150,81 @@ function PostPage() {
                 </div>
               </Link>
             )}
-            <div className={`shrink-0 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] text-white/80 border border-white/10 bg-gradient-to-br ${meta.tint}`}>
-              <meta.icon className="h-3.5 w-3.5" /><span>{meta.label}</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] text-white/80 border border-white/10 bg-gradient-to-br ${meta.tint}`}>
+                <meta.icon className="h-3.5 w-3.5" /><span>{meta.label}</span>
+              </div>
+              {/* Author controls */}
+              {isAuthor && !editing && (
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setEditing(true)} className="h-8 w-8 rounded-full glass flex items-center justify-center text-white/50 hover:text-white transition" title="Edit">
+                    <Edit2 className="h-3.5 w-3.5" />
+                  </button>
+                  <button onClick={() => setConfirmDelete(true)} className="h-8 w-8 rounded-full glass flex items-center justify-center text-white/50 hover:text-red-400 transition" title="Delete">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-display text-white mb-4 leading-tight break-words">{post.title}</h1>
-          <div className="text-[15px] sm:text-base text-white/80 leading-relaxed whitespace-pre-wrap break-words">{post.body}</div>
-
-          {post.lessons_learned && (
-            <div className="mt-6 rounded-2xl border border-amber-200/20 bg-amber-300/5 p-5">
-              <div className="text-[11px] uppercase tracking-widest text-amber-200/90 mb-2">Lessons learned</div>
-              <p className="text-amber-50/95 whitespace-pre-wrap">{post.lessons_learned}</p>
+          {/* Delete confirmation */}
+          {confirmDelete && (
+            <div className="glass rounded-2xl p-4 mb-5 border border-red-400/30">
+              <p className="text-sm text-white mb-3">Are you sure you want to delete this story? This cannot be undone.</p>
+              <div className="flex gap-2">
+                <button onClick={deletePost} disabled={deleting}
+                  className="rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold px-4 py-2 transition disabled:opacity-50">
+                  {deleting ? "Deleting…" : "Yes, delete"}
+                </button>
+                <button onClick={() => setConfirmDelete(false)}
+                  className="rounded-xl glass text-white/70 hover:text-white text-sm px-4 py-2 transition">
+                  Cancel
+                </button>
+              </div>
             </div>
+          )}
+
+          {editing ? (
+            /* Edit Form */
+            <div className="space-y-3">
+              <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} maxLength={140}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-violet-400/50 text-lg font-display" />
+              <textarea value={editBody} onChange={(e) => setEditBody(e.target.value)} rows={8} placeholder="Tell the story…"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-400/50 resize-none" />
+              <textarea value={editLessons} onChange={(e) => setEditLessons(e.target.value)} rows={3} placeholder="Lessons learned (optional)"
+                className="w-full bg-amber-300/5 border border-amber-200/15 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-300/40 resize-none" />
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((c) => (
+                  <button key={c.value} type="button" onClick={() => setEditCategory(c.value)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition ${editCategory === c.value ? "bg-white/15 text-white border-white/25" : "bg-white/5 text-white/60 border-white/10"}`}>
+                    <c.icon className="h-3.5 w-3.5" />{c.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button onClick={saveEdit} disabled={saving}
+                  className="flex items-center gap-1.5 gradient-violet text-white font-semibold px-5 py-2.5 rounded-2xl glow-violet disabled:opacity-50 text-sm">
+                  <Check className="h-4 w-4" /> {saving ? "Saving…" : "Save changes"}
+                </button>
+                <button onClick={() => setEditing(false)}
+                  className="flex items-center gap-1.5 glass text-white/70 hover:text-white px-5 py-2.5 rounded-2xl text-sm transition">
+                  <X className="h-4 w-4" /> Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-display text-white mb-4 leading-tight break-words">{post.title}</h1>
+              <div className="text-[15px] sm:text-base text-white/80 leading-relaxed whitespace-pre-wrap break-words">{post.body}</div>
+
+              {post.lessons_learned && (
+                <div className="mt-6 rounded-2xl border border-amber-200/20 bg-amber-300/5 p-5">
+                  <div className="text-[11px] uppercase tracking-widest text-amber-200/90 mb-2">Lessons learned</div>
+                  <p className="text-amber-50/95 whitespace-pre-wrap">{post.lessons_learned}</p>
+                </div>
+              )}
+            </>
           )}
 
           <div className="mt-6 flex items-center gap-5 text-sm text-white/60">
