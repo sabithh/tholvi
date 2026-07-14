@@ -17,7 +17,7 @@ export const Route = createFileRoute("/u/$username")({
 function ProfilePage() {
   const { username } = Route.useParams();
   const { user } = useCurrentUser();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(undefined);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [stats, setStats] = useState({ failures: 0, glows: 0, followers: 0, following: 0 });
   const [following, setFollowing] = useState(false);
@@ -60,8 +60,8 @@ function ProfilePage() {
     }
   }
 
+  if (profile === undefined) return <AppShell><div className="py-20 text-center text-white/60">Loading…</div></AppShell>;
   if (profile === null) return <AppShell><div className="py-20 text-center text-white/60">User not found.</div></AppShell>;
-  if (!profile) return <AppShell><div className="py-20 text-center text-white/60">Loading…</div></AppShell>;
 
   const isMe = user?.id === profile.id;
 
@@ -82,7 +82,7 @@ function ProfilePage() {
               {profile.bio && <p className="text-sm text-white/75 mt-2 break-words">{profile.bio}</p>}
             </div>
             {user && !isMe && (
-              <div className="col-span-2 flex gap-2 sm:col-span-1">
+              <div className="col-span-2 flex gap-2 mt-1">
                 <button onClick={toggleFollow}
                   className={`rounded-full px-4 py-2 text-xs font-semibold ${following ? "bg-white/10 text-white/70 border border-white/10" : "gradient-violet text-white"}`}>
                   {following ? "Following" : "Follow"}

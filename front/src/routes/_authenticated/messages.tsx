@@ -56,7 +56,7 @@ function MessagesLayout() {
             <div className="glass rounded-3xl p-8 text-center text-white/55 text-sm">No conversations yet. Find people in Search and say hi.</div>
           ) : convos.map((c) => (
             <Link key={c.peer.id} to="/messages/$id" params={{ id: c.peer.id }}
-              className="block glass glass-hover rounded-2xl p-3 flex items-center gap-3">
+              className="flex items-center gap-3 glass rounded-2xl p-3 hover:bg-white/[0.08] hover:border-violet-400/20 transition-all">
               <div className="h-10 w-10 rounded-full bg-white/10 grid place-items-center overflow-hidden">
                 {c.peer.avatar_url ? <img src={c.peer.avatar_url} alt="" className="h-full w-full object-cover" /> :
                   <span className="text-white font-semibold text-sm">{(c.peer.display_name ?? "?")[0]?.toUpperCase()}</span>}

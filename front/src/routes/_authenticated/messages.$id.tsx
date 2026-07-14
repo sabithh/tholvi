@@ -49,7 +49,7 @@ function ThreadPage() {
   }
 
   return (
-    <div className="glass rounded-3xl flex flex-col h-[calc(100vh-9rem)] md:h-[calc(100vh-6rem)]">
+    <div className="glass rounded-3xl flex flex-col h-[calc(100vh-12rem)] md:h-[calc(100vh-6rem)]">
       <div className="flex items-center gap-3 p-4 border-b border-white/10">
         <Link to="/messages" className="md:hidden text-white/60"><ArrowLeft className="h-5 w-5" /></Link>
         {peer && (

@@ -65,7 +65,7 @@ function NotificationsPage() {
           {items.map((n) => {
             const Icon = iconFor(n.type);
             const content = (
-              <div className={`glass rounded-2xl p-4 flex items-center gap-3 ${!n.read ? "border-violet-400/30" : ""}`}>
+              <div className={`glass rounded-2xl p-4 flex items-center gap-3 border ${!n.read ? "border-violet-400/40 bg-violet-500/5" : "border-transparent"}`}>
                 <div className="h-10 w-10 rounded-full bg-violet-500/20 grid place-items-center">
                   <Icon className="h-5 w-5 text-violet-300" />
                 </div>

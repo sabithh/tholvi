@@ -10,7 +10,6 @@ export async function fetchFeed(filter: Filter, userId: string | null): Promise<
   if (filter.search) q = q.or(`title.ilike.%${filter.search}%,body.ilike.%${filter.search}%`);
   q = q.order("created_at", { ascending: false }).limit(50);
 
-  let postIds: string[] = [];
   if (filter.followingOf) {
     const { data: fol } = await supabase.from("follows").select("following_id").eq("follower_id", filter.followingOf);
     const ids = (fol ?? []).map((f: any) => f.following_id);
@@ -22,7 +21,6 @@ export async function fetchFeed(filter: Filter, userId: string | null): Promise<
     const ids = (bk ?? []).map((b: any) => b.post_id);
     if (ids.length === 0) return [];
     q = q.in("id", ids);
-    postIds = ids;
   }
   const { data: posts, error } = await q;
   if (error) throw error;

@@ -84,7 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <img
               src={tholviLogo}
               alt="THOLVI — Share your fails. Inspire others."
-              className="w-full h-auto shrink-0 object-contain invert drop-shadow-[0_0_25px_rgba(168,85,247,0.45)]"
+              className="max-w-[160px] w-full h-auto shrink-0 object-contain invert drop-shadow-[0_0_25px_rgba(168,85,247,0.45)]"
             />
           </Link>
 
@@ -147,12 +147,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 md:ml-64 min-h-screen pb-24 md:pb-8">
+      <main className="flex-1 md:ml-64 min-h-screen pb-28 md:pb-8">
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-6">{children}</div>
       </main>
 
       {/* Bottom nav - mobile */}
-      <nav className="md:hidden fixed bottom-3 left-3 right-3 z-30 glass rounded-2xl px-2 py-2 flex justify-around">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 glass border-t border-white/[0.06] px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around">
         {[
           { to: "/", icon: Home, label: "Home" },
           { to: "/search", icon: Search, label: "Search" },

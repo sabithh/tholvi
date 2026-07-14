@@ -49,7 +49,7 @@ function SettingsPage() {
           <span className="text-sm text-white">Post anonymously by default</span>
           <input type="checkbox" checked={anon} onChange={(e) => setAnon(e.target.checked)} className="accent-violet-500 h-4 w-4" />
         </label>
-        <button disabled={saving} className="gradient-violet text-white font-semibold px-5 py-2.5 rounded-2xl glow-violet disabled:opacity-50">
+        <button disabled={saving} className="w-full sm:w-auto gradient-violet text-white font-semibold px-5 py-2.5 rounded-2xl glow-violet disabled:opacity-50">
           {saving ? "Saving…" : "Save changes"}
         </button>
       </form>

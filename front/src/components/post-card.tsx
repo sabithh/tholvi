@@ -78,6 +78,7 @@ export function PostCard({ post, userId }: { post: FeedPost; userId: string | nu
       await supabase.from("glows").insert({ post_id: post.id, user_id: userId });
     }
     qc.invalidateQueries({ queryKey: ["feed"] });
+    qc.invalidateQueries({ queryKey: ["feed-public"] });
   }
   async function toggleBookmark(e: React.MouseEvent) {
     e.preventDefault();

@@ -41,7 +41,7 @@ function HomePage() {
             <img
               src={tholviLogo}
               alt="THOLVI — Share your fails. Inspire others."
-              className="h-40 w-auto shrink-0 object-contain invert drop-shadow-[0_0_20px_rgba(168,85,247,0.45)]"
+              className="h-10 w-auto shrink-0 object-contain invert drop-shadow-[0_0_20px_rgba(168,85,247,0.45)]"
             />
           </div>
           <h1 className="hidden md:block text-3xl font-display text-white tracking-tight">Home</h1>

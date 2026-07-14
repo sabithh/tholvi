@@ -18,7 +18,7 @@ export const Route = createFileRoute("/post/$id")({
 function PostPage() {
   const { id } = Route.useParams();
   const { user } = useCurrentUser();
-  const [post, setPost] = useState<any>(null);
+  const [post, setPost] = useState<any>(undefined);
   const [author, setAuthor] = useState<any>(null);
   const [glows, setGlows] = useState(0);
   const [glowed, setGlowed] = useState(false);
@@ -78,8 +78,8 @@ function PostPage() {
     if (error) toast.error(error.message); else await loadComments();
   }
 
-  if (post === null) return <AppShell><div className="py-20 text-center text-white/60">Loading…</div></AppShell>;
-  if (!post) return <AppShell><div className="py-20 text-center text-white/60">Not found.</div></AppShell>;
+  if (post === undefined) return <AppShell><div className="py-20 text-center text-white/60">Loading…</div></AppShell>;
+  if (post === null) return <AppShell><div className="py-20 text-center text-white/60">Story not found.</div></AppShell>;
 
   const meta = categoryMeta(post.category);
 
@@ -135,7 +135,7 @@ function PostPage() {
 
         <section className="mt-6">
           <h2 className="text-lg font-semibold text-white mb-3">Comments</h2>
-          {user && (
+          {user ? (
             <form onSubmit={postComment} className="glass rounded-2xl p-3 flex items-center gap-2 mb-4">
               <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Share your take…"
                 className="flex-1 bg-transparent text-white text-sm placeholder:text-white/40 focus:outline-none px-2" />
@@ -144,6 +144,13 @@ function PostPage() {
               </label>
               <button className="rounded-xl gradient-violet text-white px-3 py-2"><Send className="h-4 w-4" /></button>
             </form>
+          ) : (
+            <div className="glass rounded-2xl p-4 mb-4 text-center">
+              <p className="text-sm text-white/60">
+                <Link to="/auth" className="text-violet-400 hover:text-violet-300 font-medium underline underline-offset-2">Sign in</Link>
+                {" "}to join the conversation.
+              </p>
+            </div>
           )}
           <div className="space-y-2">
             {comments.map((c) => (

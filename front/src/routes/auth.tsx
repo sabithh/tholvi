@@ -1,9 +1,10 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
+import tholviLogo from "@/assets/tholvi-logo-transparent.png";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -33,11 +34,16 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { emailRedirectTo: window.location.origin, data: { display_name: name || email.split("@")[0] } },
         });
         if (error) throw error;
+        
+        if (!data.session) {
+          toast.success("Please check your email to confirm your account!");
+          return;
+        }
         toast.success("Welcome to THOLVI");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -61,12 +67,22 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen grid place-items-center p-4">
-      <div className="w-full max-w-md glass rounded-3xl p-8">
+      <div className="w-full max-w-md glass rounded-3xl p-6 sm:p-8">
+        {/* Back button */}
+        <Link
+          to="/"
+          className="flex items-center gap-1.5 text-sm text-white/50 hover:text-white transition mb-5 -mt-1"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
+
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="h-12 w-12 rounded-2xl gradient-violet grid place-items-center glow-violet mb-3">
-            <Sparkles className="h-6 w-6 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-white tracking-wide">THOLVI</h1>
+          <img
+            src={tholviLogo}
+            alt="THOLVI"
+            className="w-28 sm:w-32 h-auto object-contain invert drop-shadow-[0_0_25px_rgba(168,85,247,0.45)] mb-3"
+          />
           <p className="text-sm text-white/60 mt-1">Where founders share what didn't work.</p>
         </div>
 
